@@ -97,7 +97,7 @@ function makeindex(name,dir,inext,outext,logext,style)
   return 0
 end
 
-function tex(file,dir,cmd)
+function typeset_tex(file,dir,cmd)
   dir = dir or "."
   cmd = cmd or typesetexe .. " " .. typesetopts
   return runcmd(cmd .. " \"" .. typesetcmds
@@ -154,7 +154,7 @@ end
 
 function typeset(file,dir,exe)
   dir = dir or "."
-  local errorlevel = tex(file,dir,exe)
+  local errorlevel = typeset_tex(file,dir,exe)
   if errorlevel ~= 0 then
     return errorlevel
   end
@@ -167,7 +167,7 @@ function typeset(file,dir,exe)
     errorlevel =
       makeindex(name,dir,".glo",".gls",".glg",glossarystyle) +
       makeindex(name,dir,".idx",".ind",".ilg",indexstyle)    +
-      tex(file,dir,exe)
+      typeset_tex(file,dir,exe)
     if errorlevel ~= 0 then break end
   end
   return errorlevel
@@ -268,3 +268,10 @@ function doc(files)
   end
   return 0
 end
+
+-- For backwards compatibility support tex(file,dir,cmd)
+local t = {
+  __call = function(name,file,dir,cmd) return typeset_tex(file,dir,cmd) end
+}
+setmetatable(tex,t)
+
